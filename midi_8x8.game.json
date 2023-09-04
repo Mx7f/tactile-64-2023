@@ -1,0 +1,77 @@
+{
+    "title": "MIDI: TacTile 64 Jam Demo",
+    "developer": "CasualEffects",
+    "copyright": "©2023 Morgan McGuire",
+    "license": "Open source under the MIT license https://opensource.org/licenses/MIT",
+    "packages": [],
+    "scripts": [
+        "quad://scripts/midi_8x8.pyxl",
+        "demo.pyxl"
+    ],
+    "modes": [
+        "Play"
+    ],
+    "start_mode": "Play",
+    "docs": [
+        {
+            "name": "jam_notes",
+            "url": "jam_notes.md.html"
+        }
+    ],
+    "assets": {
+        "font": "quad://fonts/deja-8.font.json",
+        "bounce_sound": "quad://sounds/blip-03.sound.json",
+        "kick_drum_sound": "quad://sounds/drum-00.sound.json",
+        "closed_hihat_sound": "quad://sounds/drum-01.sound.json",
+        "snare_drum_sound": "quad://sounds/drum-03.sound.json",
+        "paddle_sound": "quad://sounds/hit-05.sound.json",
+        "get_ready_sprite": "get_ready.sprite.json"
+    },
+    "version": 0,
+    "min_players": 1,
+    "max_players": 1,
+    "cooperative": false,
+    "competitive": false,
+    "achievements": false,
+    "highscores": false,
+    "description": "Demonstration of the 8x8 MIDI controller abstraction API used for the TacTile 64 Jam",
+    "constants": {
+        "tempo": {
+            "type": "number",
+            "value": "200",
+            "description": "In beats per minute",
+            "min": 30,
+            "max": 240,
+            "format": "",
+            "quantum": 1
+        },
+        "wall_color": {
+            "type": "rgb",
+            "value": {
+                "r": {
+                    "type": "number",
+                    "value": "100%"
+                },
+                "g": {
+                    "type": "number",
+                    "value": "82%"
+                },
+                "b": {
+                    "type": "number",
+                    "value": "29%"
+                }
+            }
+        },
+        "INTRO_FRAMES": {
+            "type": "number",
+            "value": "404",
+            "min": 0,
+            "max": 1000,
+            "format": "0",
+            "quantum": 1
+        }
+    },
+    "screenshot_tag": "midi8x8",
+    "y_up": true,
+    "midi_sysex": true
+}

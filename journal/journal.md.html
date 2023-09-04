@@ -1,0 +1,125 @@
+<meta charset="utf-8"><link rel="stylesheet" href="https://casual-effects.com/markdeep/latest/apidoc.css?">
+**<span style="display:none">TacTile 64 Jam</span>**
+          **![](../title.png)**
+          **Michael Mara's Dev Journal**
+
+Description of the [Jam](https://itch.io/jam/tactile-64):
+
+> This jam is powered by a quadplay✜ in a web browser, connected to a
+> 8x8 RGB USB MIDI grid controller. The [`midi_8x8.pyxl`](../../../scripts/midi_8x8.pyxl) API
+> abstracts the quadplay✜ MIDI API to map all 8x8 controllers
+> to a common API, and supports emulation on phones and tablets.
+
+![](../controllers.jpg)
+
+
+Initial Update+Design (10:30)
+=================
+
+The Jam started last month, the due time is in under 9 hours, and I've not yet written a line of code or documentation, and I have to leave 2 hours before the deadline.
+Let's do this!
+
+
+I've spent the last 2 hours struggling with 2 laptops to get everything running correctly, and unfortunately have 
+not yet succeeded. My old MacBook Pro seems to disable all input devices for a half second twice a minute or so, which is 
+both incredibly frustrating, and sometimes "resets" the midi controller. I can't get any browser to recognize Novation 
+Launchpad Mini Mk3 as a MIDI device, even playing the basic samples from quadplay✜, on my work laptop (running Ubuntu), 
+even after installing the latest chrome. My workflow will be to develop on my work laptop using the emulator, and 
+then test on my MacBoook. 
+
+I still need to set things up for PyxlScript on my work laptop, then coding will commence. 
+I'm going to try and make the design documentation in line here scattered among journal entries. This is my first quadplay✜ game, 
+first PyxlScript game, first itch.io submission, and first game jam in a long time, so my expectations are low; I really want to focus on trimming scope and
+completing a proof-of-concept that I can build on later, and use to evaluate what worked and what didn't.
+
+**Main Goal**: Submitted proof-of-concept playable game on itch.io by 17:00 today.
+
+**Working Title: Life of Design**
+
+![Conway's Game of Life](Conwaylife.gif)
+
+Concept: Interactive puzzle game centered around cellular automata, like [Conway's Game of Life](https://conwaylife.com/wiki/Conway's_Game_of_Life): the player's goal
+is to interact with an 8x8 grid of cells (with square-torus connectivity) to create a pattern that matches a target pattern as the automata evolves. 
+Players will be evaluated on various different (somewhat opposing) metrics.
+
+By pressing the cells, the player can make cells enter the "alive" state. The automata will then evolve according to the rules of the automata, and the player can continue to
+set cells as the state evolves. The player can also press a button to "freeze" the automata, and then press another button to "unfreeze" it. The player can also press a button to reset.
+
+Goals:
+- [ ] Grokable introduction/instructions.
+- [ ] 3 puzzles.
+- [ ] Ability to start/stop time
+- [ ] 1 automata.
+- [ ] 3+ scoring metrics.
+- [ ] High Score Integration.
+- [ ] Submitted to itch.io.
+- [ ] Documentation of the process.
+- [ ] Basic Sound Effects.
+
+Non-Goals:
+1. Many puzzles.
+1. Multiple automata.
+1. Multiple constraints
+1. Procedural level generation.
+1. Procedural automata generation.
+1. Automata-generated sounds
+
+
+Most of the non-goals are the things I really want to do with this project, but since I've given myself so little time,
+I need to explicitly rule them out to get this foundation done.
+
+
+I am attempting, with this proof-of-concept to tap into the satisfaction of designing a solution to a problem with multiple conflicting goals, in the style of 
+Opus Magnum from Zachtronics:
+
+![Opus Magnum Example, 3 Scoring Methods on the Bottom](Opus-Magnum-Waterproof-Sealant-2017-12-13-16-08-57.gif)
+
+In that game you design solutions to puzzles that are evaluated on 3 metrics: cost, cycles, and area. The player is encouraged to optimize for one or more of these metrics,
+via a leaderboard that shows the best solutions for each metric. I want to do something similar, but with cellular automata, and with a different set of metrics.
+
+Key concepts:
+
+1. Resurrections: When the player presses a cell, it is resurrected. The player can resurrect cells at any time.
+1. Intervention: All resurrections within an automata step is considered a single intervention. The player can intervene at any time.
+
+My current plan is to have the following 4 metrics:
+
+1. **Steps**: How many advancement steps does the automata take before it stabilizes? This is the most similar to Opus Magnum's "cycles" metric.
+1. **Resurrections**: How many cells are resurrected by the player? This is the most similar to Opus Magnum's "area" metric.
+1. **Interventions**: How many automata steps does the player intervene in (resurrects one or more cells)? This is somewhat similar to Opus Magnum's "cost" metric.
+1. **Time**: Unlike Opus Magnum, the player is able (and must!) intervene in the automata's evolution. The player can pause the automata, and then resume it. The player's score on this metric will be penalized for the amount of time the automata is paused.
+
+
+There's key design issues I need to resolve for the game to work:
+
+1. How does the player know what the target pattern is?
+2. How do I prevent the player from just resurrecting all the cells needed to match the target pattern?
+3. Do I want the player to know/have hints at the rules of the automata?
+
+The first issue can be solved in several ways:
+
+1. The player can be shown the target pattern at the start of the level, and then the target pattern is shown, faded out, on the 8x8 grid as the automata evolves.
+2. The player can be shown the target pattern on the computer screen.
+
+I'm partial to solution (1).
+
+Then there's the second problem. Here are some possible solutions, with pros and cons:
+
+1. The player cannot resurrect cells that are part of the target pattern. This is simple to implement, but it's not clear how to communicate this to the player, and it's not obvious how to design solvable puzzles using this technique.
+2. The player cannot resurrect some subset of cells whose intersection with the target pattern is non-empty. This is also simple to implement, it's clear how to communicate this to the player, but it's not totally clear how to design solvable puzzles using this technique.
+3. The player is limited in the number of resurrections per automata step. This is simple to implement, it's somewhat clear how to communicate this to the player (could "power down" lights around the periphery), and it's not totally clear how to design solvable puzzles using this technique.
+4. The cells have 3+ states, and the target pattern contains all states. The user can only set one type of state. This is simple to implement, it's clear how to communicate this to the player, but it requires using a more complicated automata, and it's not totally clear how to design solvable puzzles using this technique.
+5. The evaluation of "success" always happens immediately after a step, not during an intervention; therefore the player can't just set all the states in the target pattern, as the automata rules will kick in and change the pattern before evaluation. This is simple, and is probably a good idea anyways, but may be harder to communicate. Maybe interventions should be colored different than live cells? But this still needs to be combined with another constraint, otherwise the player can get a min-interventions and min-time score by setting the pattern that evolves into the target pattern on the first time step.
+6. The initial grid has one or more live cells that are not part of the target pattern, that must die off for the target pattern to be reached. This is simple to implement, easy enough to communicate, though designing solvable puzzles is still a challenge.
+
+Obviously I could create a constraint solver/smart simulator that could generate solvable puzzles, but that's a lot of work, and I don't have time for that today.
+
+For simplicity, I'm going with solution (5) and solution (6) for today. I think it'll be worth experimenting with all of these solutions in the future (and maybe more).
+
+For the third issue, I think I do want the player to know for this proof-of-concept, and I'll just use Conway's Game of Life. Obviously experimenting with other automata in the future is my goal, but I don't have time for that today.
+
+Speaking of time, its now 12:20 and I haven't written a line of code yet. Given this is a Game Jam, not a Design Doc Jam, I'm going to copy the TacTile 64 demo, and start coding. I'll post updates as I go, and put extra design notes in if it I come across other issues.
+
+
+<!-- Markdeep: --><script src="../../doc/markdeep.min.js"></script><script src="https://casual-effects.com/markdeep/latest/markdeep.min.js?"></script>
+
